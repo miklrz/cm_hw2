@@ -53,6 +53,7 @@
 
 ### Формат команды  
 ```bash
+
 python dependency_visualizer.py \
     --visualizer-path <путь_к_программе_визуализации> \
     --repo-path <путь_к_репозиторию> \
@@ -83,6 +84,7 @@ python dependency_visualizer.py \
 
 ### Построение графа  
 ```bash
+
 python dependency_visualizer.py \
     --visualizer-path /usr/bin/dot \
     --repo-path /home/user/my-repo \
@@ -93,6 +95,7 @@ python dependency_visualizer.py \
 ### Визуализация графа  
 После генерации графа в формате DOT, вы можете использовать `dot` для создания изображения:  
 ```bash
+
 dot -Tpng output_graph.dot -o output_graph.png
 ```
 
@@ -116,6 +119,7 @@ digraph {
 
 Проект включает тесты для всех основных функций. Для запуска тестов выполните:  
 ```bash
+
 python -m unittest
 ```
 
@@ -126,8 +130,3 @@ python -m unittest
 - **Python 3.8+**  
 - **Graphviz** — для визуализации графов (опционально, для преобразования формата DOT в изображение).  
 
----
-
-## Лицензия  
-
-Этот проект распространяется под лицензией MIT. См. файл [LICENSE](LICENSE) для подробностей.
