@@ -1,0 +1,13 @@
+digraph G {
+  "cf98121" [label="Commit: cf98121\nFiles: .idea/cm_hw2.iml, .idea/misc.xml, .idea/vcs.xml, README.md, dependency_visualizer.py"];
+  "71d0441" -> "cf98121";
+  "71d0441" [label="Commit: 71d0441\nFiles: "];
+  "8228bc0" -> "71d0441";
+  "8228bc0" [label="Commit: 8228bc0\nFiles: README.md"];
+  "f58f822" -> "8228bc0";
+  "f58f822" [label="Commit: f58f822\nFiles: .idea/cm_hw2.iml, .idea/misc.xml, README.md, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
+  "4af490f" -> "f58f822";
+  "4af490f" [label="Commit: 4af490f\nFiles: .idea/cm_hw2.iml, .idea/misc.xml, README.md, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
+  "0aeb162" -> "4af490f";
+  "0aeb162" [label="Commit: 0aeb162\nFiles: .idea/misc.xml, README.md, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
+}

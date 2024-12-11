@@ -74,18 +74,11 @@ python dependency_visualizer.py \
 ```bash
 
 python dependency_visualizer.py 
-  --visualizer-path  C:\ProgramFiles\Graphviz\bin\dot.exe \
+  --visualizer-path  C:\Program Files\Graphviz\bin\dot.exe \
   --date 2025-01-01  \
   --output-path C:\Users\mmyty\PycharmProjects\cm_hw2\output.dot  \
   --repo-path C:\Users\mmyty\PycharmProjects\cm_hw2 
 
-```
-
-### Визуализация графа  
-После генерации графа в формате DOT, вы можете использовать `dot` для создания изображения:  
-```bash
-
-dot -Tpng output.dot -o output_graph.png
 ```
 
 ---
@@ -117,10 +110,14 @@ digraph G {
 
 ## Тестирование  
 
+#### Результаты тестирования 
+
+![image](tests.jpg)
+
 Проект включает тесты для всех основных функций. Для запуска тестов выполните:  
 ```bash
 
-python -m unittest
+python -m unittest test_dependency_visualizer.py
 ```
 
 ---
