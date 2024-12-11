@@ -1,57 +1,88 @@
 import argparse
 import subprocess
-from datetime import datetime
 from pathlib import Path
-from graphviz import Digraph
+import os
+import datetime
+import git
 
+class DependencyVisualizer:
+    def __init__(self, repo_path: str, visualize_tool_path: str, result_file_path: str, cutoff_date: str):
+        self.repo_path = repo_path
+        self.visualize_tool_path = visualize_tool_path
+        self.result_file_path = result_file_path
+        self.cutoff_date = datetime.datetime.strptime(cutoff_date, '%Y-%m-%d')
+        self.repo = git.Repo(self.repo_path)
 
-def get_git_commits(repo_path: Path, date: str):
-    """
-    Извлекает список коммитов до заданной даты вместе со списками измененных файлов.
-    """
-    command = [
-        "git", "-C", str(repo_path),
-        "log", "--pretty=format:%H %at", "--name-only", "--before", date
-    ]
-    result = subprocess.run(command, capture_output=True, text=True, check=True)
-    commits = []
-    for block in result.stdout.strip().split("\n\n"):
-        lines = block.strip().split("\n")
-        commit_hash, timestamp = lines[0].split()[:2]
-        files = lines[1:] if len(lines) > 1 else []
-        commits.append({
-            "hash": commit_hash,
-            "timestamp": int(timestamp),
-            "files": files
-        })
-    return commits
+    def get_commits_before_date(self):
+        """
+        Возвращает список коммитов, сделанных до заданной даты.
+        """
+        commits = []
+        for commit in self.repo.iter_commits():
+            commit_time = commit.committed_datetime.replace(tzinfo=None)  # Преобразуем в naive datetime
+            if commit_time < self.cutoff_date:
+                commits.append(commit)
+        return commits
 
+    def get_files_in_commit(self, commit):
+        """
+        Возвращает список файлов, измененных в коммите.
+        """
+        files = []
+        for diff in commit.diff('HEAD~1', create_patch=True):
+            if diff.a_path and diff.a_path not in files:
+                files.append(diff.a_path)
+            if diff.b_path and diff.b_path not in files:
+                files.append(diff.b_path)
+        return files
 
-def build_dependency_graph(commits):
-    """
-    Строит граф зависимостей коммитов, основываясь на изменениях в файлах.
-    """
-    graph = Digraph()
-    graph.attr(rankdir="LR")
+    def build_dependency_graph(self):
+        """
+        Строит граф зависимостей для коммитов и файлов.
+        """
+        commits = self.get_commits_before_date()
+        graph_code = "digraph G {\n"
 
-    for commit in commits:
-        node_label = f"{commit['hash'][:7]}\\n{datetime.utcfromtimestamp(commit['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}"
-        if commit["files"]:
-            node_label += "\\n" + "\\n".join(commit["files"])
-        graph.node(commit["hash"], label=node_label, shape="box")
+        for commit in commits:
+            commit_files = self.get_files_in_commit(commit)
+            commit_id = commit.hexsha[:7]
+            graph_code += f'  "{commit_id}" [label="Commit: {commit_id}\\nFiles: {", ".join(commit_files)}"];\n'
 
-    for i in range(len(commits) - 1):
-        graph.edge(commits[i + 1]["hash"], commits[i]["hash"])
+            for parent in commit.parents:
+                parent_id = parent.hexsha[:7]
+                graph_code += f'  "{parent_id}" -> "{commit_id}";\n'
 
-    return graph
+        graph_code += "}\n"
+        return graph_code
 
+    def save_graph_to_file(self, graph_code):
+        """
+        Сохраняет код графа в файл.
+        """
+        with open(self.result_file_path, 'w') as result_file:
+            result_file.write(graph_code)
 
-def save_graph_to_file(graph, output_path):
-    """
-    Сохраняет граф в текстовом виде в файл.
-    """
-    with open(output_path, "w") as file:
-        file.write(graph.source)
+    def visualize(self):
+        """
+        Генерирует визуализацию с помощью Graphviz.
+        """
+        graph_code = self.build_dependency_graph()
+        self.save_graph_to_file(graph_code)
+
+        # Выводим код графа на экран
+        print(graph_code)
+
+        # Проверяем, существует ли путь к Graphviz
+        if self.visualize_tool_path and os.path.exists(self.visualize_tool_path):
+            subprocess.run([self.visualize_tool_path, '-Tpng', self.result_file_path, '-o', 'dependency_graph.png'])
+        else:
+            print("Graphviz не найден. Пожалуйста, проверьте путь к инструменту визуализации.")
+
+    def run(self):
+        """
+        Запускает процесс визуализации.
+        """
+        self.visualize()
 
 
 def main():
@@ -63,15 +94,26 @@ def main():
 
     args = parser.parse_args()
 
-    commits = get_git_commits(args.repo_path, args.date)
-    if not commits:
-        print("Нет коммитов до заданной даты.")
-        return
+    repo_path = args.repo_path
+    visualize_tool_path = args.visualizer_path  # Путь к инструменту Graphviz
+    result_file_path = args.output_path
+    cutoff_date = args.date
 
-    graph = build_dependency_graph(commits)
-    save_graph_to_file(graph, args.output_path)
-    print(f"Граф успешно сохранен в файл: {args.output_path}")
-
+    visualizer = DependencyVisualizer(repo_path, visualize_tool_path, result_file_path, cutoff_date)
+    visualizer.run()
 
 if __name__ == "__main__":
     main()
+
+# Пример использования класса
+# if __name__ == '__main__':
+#     repo_path = 'C:\\Users\\mmyty\\PycharmProjects\\cm_hw2'
+#     visualize_tool_path = 'C:\\Program Files\\Graphviz\\bin\\dot.exe'  # Путь к инструменту Graphviz
+#     result_file_path = 'C:\\Users\\mmyty\\PycharmProjects\\cm_hw2\\output.dot'
+#     cutoff_date = '2025-01-01'
+#
+#     visualizer = DependencyVisualizer(repo_path, visualize_tool_path, result_file_path, cutoff_date)
+#     visualizer.run()
+
+
+

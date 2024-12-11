@@ -30,7 +30,7 @@
 
 **Dependency Visualizer** — инструмент командной строки для визуализации графа зависимостей коммитов в Git-репозитории. Граф строится для коммитов, сделанных до указанной даты, с узлами, содержащими информацию о списках файлов и папок.  
 
-Результат визуализации сохраняется в формате Graphviz (DOT), который можно использовать для дальнейшей генерации изображений с помощью сторонних программ, таких как `dot`.
+Результат визуализации выводится на экран в виде кода и преобразуется в png файл при помощи Graphviz.
 
 ---
 
@@ -49,15 +49,18 @@ python dependency_visualizer.py \
 ### Аргументы  
 - **`--visualizer-path`**  
   Путь к программе для визуализации графов (например, `dot`, часть пакета Graphviz).  
-  *Пример:* `/usr/bin/dot`  
+  *Пример:* `/usr/bin/dot`
+
 
 - **`--repo-path`**  
   Путь к анализируемому Git-репозиторию.  
   *Пример:* `/home/user/my-repo`  
 
+
 - **`--output-path`**  
   Путь к выходному файлу, где будет сохранен результат в формате DOT.  
   *Пример:* `output_graph.dot`  
+
 
 - **`--date`**  
   Дата, до которой нужно учитывать коммиты. Формат: `YYYY-MM-DD`.  
@@ -71,10 +74,10 @@ python dependency_visualizer.py \
 ```bash
 
 python dependency_visualizer.py 
-  --visualizer-path  C:\Users\Михаил\Graphviz-12.2.1-win64\bin\dot.exe \
+  --visualizer-path  C:\ProgramFiles\Graphviz\bin\dot.exe \
   --date 2025-01-01  \
-  --output-path C:\Users\Михаил\PycharmProjects\cm_hw2\output.dot  \
-  --repo-path C:\Users\Михаил\PycharmProjects\cm_hw2 \
+  --output-path C:\Users\mmyty\PycharmProjects\cm_hw2\output.dot  \
+  --repo-path C:\Users\mmyty\PycharmProjects\cm_hw2 
 
 ```
 
@@ -91,13 +94,24 @@ dot -Tpng output.dot -o output_graph.png
 
 Пример выходного файла `output_graph.dot` для нескольких коммитов:  
 ```dot
-digraph {
-    rankdir=LR;
-    "abc123" [label="abc123\n2023-12-31 14:30:00\nfile1.txt\nfile2.txt", shape=box];
-    "def456" [label="def456\n2023-12-30 10:15:00\nfile3.txt", shape=box];
-    "def456" -> "abc123";
+digraph G {                              
+  "71d0441" [label="Commit: 71d0441\nFiles: README.md"];
+  "8228bc0" -> "71d0441";
+  "8228bc0" [label="Commit: 8228bc0\nFiles: "];
+  "f58f822" -> "8228bc0";
+  "f58f822" [label="Commit: f58f822\nFiles: .idea/cm_hw2.iml, .idea/misc.xml, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
+  "4af490f" -> "f58f822";
+  "4af490f" [label="Commit: 4af490f\nFiles: .idea/cm_hw2.iml, .idea/misc.xml, README.md, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
+  "0aeb162" -> "4af490f";
+  "0aeb162" [label="Commit: 0aeb162\nFiles: .idea/misc.xml, README.md, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
 }
+
 ```
+---
+
+## Пример графа 
+
+![image](dependency_graph.png)
 
 ---
 
