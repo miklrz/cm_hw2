@@ -34,21 +34,6 @@
 
 ---
 
-## Установка  
-
-1. Убедитесь, что на вашем компьютере установлен Python 3.8+.
-2. Склонируйте репозиторий проекта:  
-   ```bash
-   git clone <URL_РЕПОЗИТОРИЯ>
-   cd dependency-visualizer
-   ```
-3. Установите необходимые зависимости:  
-   ```bash
-   pip install -r requirements.txt
-   ```
-
----
-
 ## Использование  
 
 ### Формат команды  
@@ -85,18 +70,19 @@ python dependency_visualizer.py \
 ### Построение графа  
 ```bash
 
-python dependency_visualizer.py \
-    --visualizer-path /usr/bin/dot \
-    --repo-path /home/user/my-repo \
-    --output-path output_graph.dot \
-    --date 2024-01-01
+python dependency_visualizer.py 
+  --visualizer-path  C:\Users\Михаил\Graphviz-12.2.1-win64\bin\dot.exe \
+  --date 2025-01-01  \
+  --output-path C:\Users\Михаил\PycharmProjects\cm_hw2\output.dot  \
+  --repo-path C:\Users\Михаил\PycharmProjects\cm_hw2 \
+
 ```
 
 ### Визуализация графа  
 После генерации графа в формате DOT, вы можете использовать `dot` для создания изображения:  
 ```bash
 
-dot -Tpng output_graph.dot -o output_graph.png
+dot -Tpng output.dot -o output_graph.png
 ```
 
 ---
