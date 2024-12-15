@@ -74,37 +74,34 @@ python dependency_visualizer.py \
 ```bash
 
 python dependency_visualizer.py 
-  --visualizer-path  C:\Program Files\Graphviz\bin\dot.exe \
-  --date 2025-01-01  \
-  --output-path C:\Users\mmyty\PycharmProjects\cm_hw2\output.dot  \
-  --repo-path C:\Users\mmyty\PycharmProjects\cm_hw2 
-
+  --visualizer-path C:\Program\tFiles\Graphviz\bin\dot.exe \
+  --date 2025-01-01 \
+  --output-path C:\Users\mmyty\PycharmProjects\PythonProject\cm_hw2\output.dot \
+  --repo-path C:\Users\mmyty\PycharmProjects\PythonProject\cm_hw2\repository
 ```
 
 ---
 
 ## Пример вывода  
 
-Пример выходного файла `output_graph.dot` для нескольких коммитов:  
+Пример выходного файла `output.dot` для нескольких коммитов:  
 ```dot
-digraph G {                              
-  "71d0441" [label="Commit: 71d0441\nFiles: README.md"];
-  "8228bc0" -> "71d0441";
-  "8228bc0" [label="Commit: 8228bc0\nFiles: "];
-  "f58f822" -> "8228bc0";
-  "f58f822" [label="Commit: f58f822\nFiles: .idea/cm_hw2.iml, .idea/misc.xml, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
-  "4af490f" -> "f58f822";
-  "4af490f" [label="Commit: 4af490f\nFiles: .idea/cm_hw2.iml, .idea/misc.xml, README.md, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
-  "0aeb162" -> "4af490f";
-  "0aeb162" [label="Commit: 0aeb162\nFiles: .idea/misc.xml, README.md, main.py, dependency_visualizer.py, test_dependency_visualizer.py"];
+digraph G {
+  "6aa6bf1" [label="Commit: 6aa6bf1
+third file"]
+  "ad18c54" -> "6aa6bf1";
+  "ad18c54" [label="Commit: ad18c54
+second commit;"]
+  "ea4cd78" -> "ad18c54";
+  "ea4cd78" [label="Commit: ea4cd78
+first commit"]
 }
-
 ```
 ---
 
 ## Пример графа 
 
-![image](dependency_graph.png)
+![image](graph.png)
 
 ---
 
