@@ -3,38 +3,69 @@ import subprocess
 from pathlib import Path
 import os
 import datetime
-import git
+import zlib
 
 class DependencyVisualizer:
     def __init__(self, repo_path: str, visualize_tool_path: str, result_file_path: str, cutoff_date: str):
-        self.repo_path = repo_path
         self.visualize_tool_path = visualize_tool_path
         self.result_file_path = result_file_path
         self.cutoff_date = datetime.datetime.strptime(cutoff_date, '%Y-%m-%d')
-        self.repo = git.Repo(self.repo_path)
+
+        self.repo_path = Path(repo_path).resolve()
+        if not (self.repo_path / ".git").exists():
+            raise ValueError("Указанный путь не содержит Git-репозиторий.")
+
+    def read_git_object(self, object_hash):
+        """Читает объект из .git/objects по его хэшу."""
+        object_dir = self.repo_path / ".git" / "objects" / object_hash[:2]
+        object_file = object_dir / object_hash[2:]
+        print(object_hash[2:])
+        if not object_file.exists():
+            raise FileNotFoundError(f"Объект {object_hash} не найден в репозитории.")
+
+        with open(object_file, 'rb') as f:
+            compressed_data = f.read()
+            decompressed_data = zlib.decompress(compressed_data)
+
+        return decompressed_data
+
+    def parse_commit(self, commit_data):
+        """Парсит объект коммита, извлекая его метаинформацию и сообщение."""
+        header, _, body = commit_data.partition(b'\n\n')
+        lines = header.split(b'\n')
+
+        metadata = {}
+        for line in lines:
+            key, _, value = line.partition(b' ')
+            metadata[key.decode()] = value.decode()
+
+        metadata['message'] = body.decode().strip()
+        return metadata
 
     def get_commits_before_date(self):
-        """
-        Возвращает список коммитов, сделанных до заданной даты.
-        """
-        commits = []
-        for commit in self.repo.iter_commits():
-            commit_time = commit.committed_datetime.replace(tzinfo=None)  # Преобразуем в naive datetime
-            if commit_time < self.cutoff_date:
-                commits.append(commit)
-        return commits
+        """Возвращает список хэшей коммитов, сделанных до заданной даты."""
+        head_file = self.repo_path / ".git" / "refs" / "heads" / "master"
+        with open(head_file, 'r') as f:
+            head_commit = f.read().strip()
 
-    def get_files_in_commit(self, commit):
-        """
-        Возвращает список файлов, измененных в коммите.
-        """
-        files = []
-        for diff in commit.diff('HEAD~1', create_patch=True):
-            if diff.a_path and diff.a_path not in files:
-                files.append(diff.a_path)
-            if diff.b_path and diff.b_path not in files:
-                files.append(diff.b_path)
-        return files
+        commits = []
+        stack = [head_commit]
+
+        while stack:
+            current_hash = stack.pop()
+            commit_data = self.read_git_object(current_hash)
+            commit_info = self.parse_commit(commit_data)
+
+            commit_time = datetime.datetime.fromtimestamp(int(commit_info['committer'].split(' ')[-2]))
+
+            if commit_time < self.cutoff_date:
+                commits.append((current_hash, commit_info))
+
+            if 'parent' in commit_info:
+                parent_hashes = commit_info['parent'].split()
+                stack.extend(parent_hashes)
+
+        return commits
 
     def build_dependency_graph(self):
         """
@@ -43,14 +74,14 @@ class DependencyVisualizer:
         commits = self.get_commits_before_date()
         graph_code = "digraph G {\n"
 
-        for commit in commits:
-            commit_files = self.get_files_in_commit(commit)
-            commit_id = commit.hexsha[:7]
-            graph_code += f'  "{commit_id}" [label="Commit: {commit_id}\\nFiles: {", ".join(commit_files)}"];\n'
+        for commit_hash, commit_info in commits:
+            commit_id = commit_hash[:7]
+            graph_code += f'  "{commit_id}" [label="Commit: {commit_id}\n{commit_info["message"]}"]\n';
 
-            for parent in commit.parents:
-                parent_id = parent.hexsha[:7]
-                graph_code += f'  "{parent_id}" -> "{commit_id}";\n'
+            if 'parent' in commit_info:
+                for parent_hash in commit_info['parent'].split():
+                    parent_id = parent_hash[:7]
+                    graph_code += f'  "{parent_id}" -> "{commit_id}";\n'
 
         graph_code += "}\n"
         return graph_code
