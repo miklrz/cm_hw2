@@ -19,7 +19,6 @@ class DependencyVisualizer:
         """Читает объект из .git/objects по его хэшу."""
         object_dir = self.repo_path / ".git" / "objects" / object_hash[:2]
         object_file = object_dir / object_hash[2:]
-        print(object_hash[2:])
         if not object_file.exists():
             raise FileNotFoundError(f"Объект {object_hash} не найден в репозитории.")
 
@@ -135,16 +134,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# Пример использования класса
-# if __name__ == '__main__':
-#     repo_path = 'C:\\Users\\mmyty\\PycharmProjects\\cm_hw2'
-#     visualize_tool_path = 'C:\\Program Files\\Graphviz\\bin\\dot.exe'  # Путь к инструменту Graphviz
-#     result_file_path = 'C:\\Users\\mmyty\\PycharmProjects\\cm_hw2\\output.dot'
-#     cutoff_date = '2025-01-01'
-#
-#     visualizer = DependencyVisualizer(repo_path, visualize_tool_path, result_file_path, cutoff_date)
-#     visualizer.run()
-
-
-
